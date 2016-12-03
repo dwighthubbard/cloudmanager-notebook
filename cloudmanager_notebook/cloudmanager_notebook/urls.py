@@ -15,12 +15,11 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from django.views.generic import TemplateView
-from cloudmanager_notebook_ui.views import IndexView, BoardView
+from cloudmanager_notebook_ui.views import BoardIndexView, BoardView
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^$', IndexView.as_view()),
+    url(r'^$', BoardIndexView.as_view()),
     url(r'^board/$', BoardView.as_view())
 ]

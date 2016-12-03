@@ -5,11 +5,11 @@ from django.views.generic import TemplateView
 from cloudmanager.board import MicropythonBoards
 
 
-class IndexView(TemplateView):
+class BoardIndexView(TemplateView):
     template_name = "cloudmanager_notebook_ui/index.html"
 
     def get_context_data(self, **kwargs):
-        context = super(IndexView, self).get_context_data(**kwargs)
+        context = super(BoardIndexView, self).get_context_data(**kwargs)
         context['boards'] = MicropythonBoards().all()
         return context
 
