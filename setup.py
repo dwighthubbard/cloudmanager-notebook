@@ -60,7 +60,7 @@ def get_version(version_file):
         Version string
     """
     for env_variable in ['BUILD_NUMBER', 'TRAVIS_BUILD_NUMBER']:
-        build_number = int(os.environ.get(env_variable, '0'))
+        build_number = int(os.environ.get(env_variable, '1'))
         if build_number:
             break
 
