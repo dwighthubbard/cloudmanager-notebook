@@ -43,6 +43,7 @@ class RunView(View):
         print(args[0].POST)
         board = args[0].POST['board']
         code = args[0].POST['code']
+        output = ''
         try:
             for result in MicropythonBoards().execute(code, range=board):
                 output = result.read().decode()
