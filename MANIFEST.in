@@ -1,0 +1,4 @@
+include LICENSE
+include README.rst
+recursive-include cloudmanager_notebook_ui/static *
+recursive-include cloudmanager_notebook_ui/templates *

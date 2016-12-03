@@ -60,7 +60,7 @@ def get_version(version_file):
         Version string
     """
     for env_variable in ['BUILD_NUMBER', 'TRAVIS_BUILD_NUMBER']:
-        build_number = int(os.environ.get(env_variable, '1'))
+        build_number = int(os.environ.get(env_variable, '3'))
         if build_number:
             break
 
@@ -105,7 +105,16 @@ if __name__ == '__main__':
                 'static/backgrounds/*',
                 'static/css/*',
                 'static/fonts/*',
+                'static/js/*',
+                'static/lib/*',
                 'static/logos/*',
+                'static/mode/*',
+                'static/mode/python/*',
+                'static/cloudmanager_notebook_ui/*',
+                'static/cloudmanager_notebook_ui/js/*',
+                'static/cloudmanager_notebook_ui/lib/*',
+                'static/cloudmanager_notebook_ui/mode/*',
+                'static/cloudmanager_notebook_ui/mode/python/*',
                 'templates/*',
                 'templates/cloudmanager_notebook_ui/*',
             ],
