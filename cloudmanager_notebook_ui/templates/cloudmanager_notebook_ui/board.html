@@ -1,50 +1,154 @@
+{% load static %}
 <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+        <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-    <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-    <link href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css"
-    rel="stylesheet" type="text/css">
-    <link href="http://pingendo.github.io/pingendo-bootstrap/themes/default/bootstrap.css"
-    rel="stylesheet" type="text/css">
-  </head>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
-  <body>
-    <div class="navbar navbar-default navbar-static-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-ex-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#"><span>Brand</span></a>
-        </div>
-        <div class="collapse navbar-collapse" id="navbar-ex-collapse">
-          <ul class="nav navbar-nav navbar-right">
-            <li class="active">
-              <a href="#">Home</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="section">
-      <div class="container">
-        <div class="row">
-          <div class="col-md-12">
-            <form role="form">
-              <div class="form-group">
-                  <textarea class="form-control" rows="5" id="code1"></textarea>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+        <link href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        {% comment %}<link href="http://pingendo.github.io/pingendo-bootstrap/themes/default/bootstrap.css" rel="stylesheet" type="text/css">{% endcomment %}
+        <script src="{% static "cloudmanager_notebook_ui/lib/codemirror.js" %}"></script>
+        <script src="{% static "cloudmanager_notebook_ui/mode/python/python.js" %}"></script>
+        <link rel="stylesheet" href="{% static "cloudmanager_notebook_ui/lib/codemirror.css" %}">
+        <style>
+            .CodeMirror {
+                border: 1px solid #eee;
+                height: auto;
+            }
+            .CodeMirror-focused {
+                background: rgba(0, 0, 0, 0) linear-gradient(to right, #42a5f5 -40px, #42a5f5 5px, transparent 5px, transparent 100%) repeat scroll 0 0;
+                border-color: #ababab;
+                padding-left: 6px;
+            }
+            div.input {
+                height: 50%;
+            }
+        </style>
+        <script src="{% static "cloudmanager_notebook_ui/mode/javascript/javascript.js" %}"></script>
+        <script>
+            var cell = '<div class="cell"><div class="input"> <textarea class="CodeMirror python-editor"></textarea></div><div class="output hidden"><pre></pre></div></div>';
+            (function(){
+                var $ = jQuery;
+                $(document).ready(function(){
+                    $('textarea.python-editor').each(function(idx, el){
+                        var editor = CodeMirror.fromTextArea(el, {
+                            mode: 'python'
+                            // lineNumbers: true,
+                            // height: 'dynamic'
+                        });
+                        $(el).data('CodeMirrorInstance', editor);
+                    });
+                });
+            })();
+
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie != '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = jQuery.trim(cookies[i]);
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            function select_next_cell() {
+                var current_cell = $('div.cell.active');
+                next_cell = current_cell.parent().next();
+                if (next_cell.length === 0) {
+                    current_cell.parent().append(cell);
+                    next_cell = current_cell.parent().next();
+                    var el = next_cell.children('div.input').children('textarea.python-editor');
+                    var editor = CodeMirror.fromTextArea(el, {
+                        //lineNumbers: true,
+                        mode: 'python'
+                        //height: 'dynamic'
+                    });
+                    $(el).data('CodeMirrorInstance', editor);
+
+                };
+                current_cell.removeClass('active');
+                next_cell.addClass('active');
+            };
+
+            function run_code() {
+                var editor = $('div.cell.active').children('div.input').children('textarea.python-editor').data('CodeMirrorInstance');
+                editor.save();
+                var code = $('textarea.python-editor-active').val();
+                console.log(code)
+                var data = {
+                    "board": "{{ board.name }}",
+                    "code": code,
+                    "CSRFToken": getCookie('csrftoken')
+                };
+                $.post( "/run/", data, function( result ) {
+                    console.log(result);
+                    var output_cell = $('div.cell.active').children('div.output');
+                    output_cell.html('<pre>' + result["output"] + '</pre>');
+                    output_cell.removeClass('hidden');
+                    //select_next_cell();
+                });
+            };
+
+        </script>
+    </head>
+    <body>
+        <div class="navbar navbar-default navbar-static-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-ex-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#"><span>Micropython Cloudmanager - {{ board.name }}</span></a>
+                </div>
+                <div class="collapse navbar-collapse" id="navbar-ex-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class="active">
+                            <a href="/">Home</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% comment %}<div class="section">{% endcomment %}
+            {% csrf_token %}
+            <div class="container">
+                <div classs="row">
+                    <div class="btn-toolbar" role="toolbar">
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-secondary" id="button_run" onclick="run_code();"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 selected">
+                        <div class="cell active">
+                            <div class="input">
+                                <textarea class="CodeMirror python-editor python-editor-active"></textarea>
+                            </div>
+                            <div class="output hidden">
+                                <pre></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% comment %}</div>{% endcomment %}
+    </body>
 </html>

@@ -42,7 +42,7 @@
                         <div class="col-md-12">
                             <ul class="list-group">
                                 {% for board in boards %}
-                                    <li class="list-group-item">{{board.name}}</li>
+                                    <li class="list-group-item"><a href="/board/?board={{ board.name }}">{{board.name}}</a></li>
                                 {% endfor %}
                             </ul>
                         </div>
