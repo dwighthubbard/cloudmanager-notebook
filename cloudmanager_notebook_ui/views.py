@@ -46,13 +46,19 @@ class RunView(View):
         board = args[0].POST['board']
         code = args[0].POST['code']
         output = ''
-        try:
-            output = MicropythonBoard(board).execute(code).read().decode()
-            # for result in MicropythonBoards().execute(code, range=board):
-            #     print(result)
-            #     output += result.read().decode()
-        except BoardNotResponding:
-            output = 'Board %r is not responding' % board
+        print(board)
+        if code.startswith('!install '):
+            for package in code.split()[1:]:
+                output += 'Installing package: {package}\n'.format(package=package)
+                MicropythonBoards().install(package_name=package, range=board.encode())
+        else:
+                try:
+                    output = MicropythonBoard(board).execute(code).read().decode()
+                    # for result in MicropythonBoards().execute(code, range=board):
+                    #     print(result)
+                    #     output += result.read().decode()
+                except BoardNotResponding:
+                    output = 'Board %r is not responding' % board
         return JsonResponse({'output': output})
 
 @method_decorator(csrf_exempt, name='dispatch')
