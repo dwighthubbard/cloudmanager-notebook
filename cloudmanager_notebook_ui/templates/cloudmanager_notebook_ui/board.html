@@ -3,51 +3,63 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-        <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-
-        <!-- Latest compiled and minified CSS -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-        <!-- Optional theme -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-
-        <!-- Latest compiled and minified JavaScript -->
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
-        <link href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-        {% comment %}<link href="http://pingendo.github.io/pingendo-bootstrap/themes/default/bootstrap.css" rel="stylesheet" type="text/css">{% endcomment %}
+        <script type="text/javascript" src="{% static "js/jquery.min.js" %}"></script>
+        <script type="text/javascript" src="{% static "js/bootstrap.min.js" %}"></script>
+        <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
+        <link rel="stylesheet" href="{% static "css/bootstrap-theme.min.css" %}">
+        <script src="{% static "js/bootstrap.min.js" %}" crossorigin="anonymous"></script>
+        <link href="{% static "css/font-awesome.min.css" %}" rel="stylesheet" type="text/css">
+        {% comment %}
+        <link href="http://pingendo.github.io/pingendo-bootstrap/themes/default/bootstrap.css" rel="stylesheet" type="text/css">
+        {% endcomment %}
         <script src="{% static "cloudmanager_notebook_ui/lib/codemirror.js" %}"></script>
         <script src="{% static "cloudmanager_notebook_ui/mode/python/python.js" %}"></script>
+        <script src="{% static "cloudmanager_notebook_ui/mode/javascript/javascript.js" %}"></script>
         <link rel="stylesheet" href="{% static "cloudmanager_notebook_ui/lib/codemirror.css" %}">
         <style>
             .CodeMirror {
-                border: 1px solid #eee;
+                border: 1px solid #000eee;
                 height: auto;
+            }
+            .CodeMirror-scroll {
+                height:auto;
             }
             .CodeMirror-focused {
                 background: rgba(0, 0, 0, 0) linear-gradient(to right, #42a5f5 -40px, #42a5f5 5px, transparent 5px, transparent 100%) repeat scroll 0 0;
                 border-color: #ababab;
                 padding-left: 6px;
             }
-            div.input {
+            div.inputdisabled {
                 height: 50%;
             }
         </style>
-        <script src="{% static "cloudmanager_notebook_ui/mode/javascript/javascript.js" %}"></script>
         <script>
-            var cell = '<div class="cell"><div class="input"> <textarea class="CodeMirror python-editor"></textarea></div><div class="output hidden"><pre></pre></div></div>';
+            var cell = '<div class="cell cell-new active"><div class="input"> <textarea class="CodeMirror python-editor python-editor-new"></textarea></div><div class="output hidden"><pre></pre></div></div>';
+             function update_status() {
+                $('#status_block').load('/boardinfo/status/?board={{ board.name }}');
+            }
+
+            function poll_status() {
+                update_status();
+                window.setTimeout(update_status, 10000);
+            }
+
             (function(){
                 var $ = jQuery;
                 $(document).ready(function(){
+                    var map = {"Shift-Enter": run_code};
                     $('textarea.python-editor').each(function(idx, el){
                         var editor = CodeMirror.fromTextArea(el, {
-                            mode: 'python'
-                            // lineNumbers: true,
-                            // height: 'dynamic'
+                            autofocus: true,
+                            mode: 'python',
+                            lineNumbers: {{ editor.lineNumbers }},
+                            height: 'dynamic',
+                            viewpointMargin: 0
                         });
+                        editor.addKeyMap(map);
                         $(el).data('CodeMirrorInstance', editor);
                     });
+                    poll_status();
                 });
             })();
 
@@ -69,28 +81,37 @@
 
             function select_next_cell() {
                 var current_cell = $('div.cell.active');
-                next_cell = current_cell.parent().next();
+                var parent_cell = current_cell.parent();
+                var next_cell = parent_cell.next();
                 if (next_cell.length === 0) {
-                    current_cell.parent().append(cell);
-                    next_cell = current_cell.parent().next();
-                    var el = next_cell.children('div.input').children('textarea.python-editor');
+                    parent_cell.append(cell);
+                    // next_cell = $('div.cell-new');
+                    var next_cell = parent_cell.next();
+                    var el = $('textarea.python-editor-new')[0];
                     var editor = CodeMirror.fromTextArea(el, {
-                        //lineNumbers: true,
-                        mode: 'python'
-                        //height: 'dynamic'
+                        autofocus: true,
+                        lineNumbers: true,
+                        mode: 'python',
+                        height: 'dynamic',
+                        viewpointMargin: 0
                     });
+                    var map = {"Shift-Enter": run_code};
+                    editor.addKeyMap(map);
                     $(el).data('CodeMirrorInstance', editor);
-
-                };
+                    $('textarea.python-editor-new').removeClass('python-editor-new');
+                }
                 current_cell.removeClass('active');
                 next_cell.addClass('active');
-            };
+                update_status();
+            }
 
             function run_code() {
+                update_status();
                 var editor = $('div.cell.active').children('div.input').children('textarea.python-editor').data('CodeMirrorInstance');
                 editor.save();
-                var code = $('textarea.python-editor-active').val();
-                console.log(code)
+                //var code = $('textarea.python-editor-active').val();
+                var code = $('div.cell.active').children('div.input').children('textarea.python-editor').val();
+                console.log(code);
                 var data = {
                     "board": "{{ board.name }}",
                     "code": code,
@@ -103,8 +124,22 @@
                     output_cell.removeClass('hidden');
                     //select_next_cell();
                 });
-            };
+                update_status();
+            }
 
+            {% comment %}
+            // Note that the path doesn't matter for routing; any WebSocket
+            // connection gets bumped over to WebSocket consumers
+            socket = new WebSocket("ws://" + window.location.host + "/chat/");
+            socket.onmessage = function(e) {
+                alert(e.data);
+            };
+            socket.onopen = function() {
+                socket.send("hello world");
+            };
+            // Call onopen directly if socket is already open
+            if (socket.readyState == WebSocket.OPEN) socket.onopen();
+            {% endcomment %}
         </script>
     </head>
     <body>
@@ -115,7 +150,8 @@
                         <span class="sr-only">Toggle navigation</span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="#"><span>Micropython Cloudmanager - {{ board.name }}</span></a>
+                    <a class="navbar-brand" href="#"><span>Micropython Cloudmanager - {{ board.name }}</span> | <span id="status_block"></span></a>
+
                 </div>
                 <div class="collapse navbar-collapse" id="navbar-ex-collapse">
                     <ul class="nav navbar-nav navbar-right">
@@ -129,10 +165,23 @@
         {% comment %}<div class="section">{% endcomment %}
             {% csrf_token %}
             <div class="container">
-                <div classs="row">
-                    <div class="btn-toolbar" role="toolbar">
-                        <div class="btn-group">
-                          <button type="button" class="btn btn-secondary" id="button_run" onclick="run_code();"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="btn-toolbar">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-inverse disabled" id="button_save" onclick="save_notebook();"><span class="glyphicon glyphicon-save" aria-hidden="true"></span> Save</button>
+                                <button type="button" class="btn btn-inverse disabled" id="button_insert" onclick="select_next_cell();"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Insert Cell</button>
+                                <button type="button" class="btn btn-inverse disabled" id="button_cut" onclick="cut_current_cell();"><span class="glyphicon glyphicon-scissors" aria-hidden="true"></span> Cut Cell</button>
+                                <button type="button" class="btn btn-inverse" id="button_run" onclick="run_code();"><span class="glyphicon glyphicon-play" aria-hidden="true"></span> Run</button>
+                                <button type="button" class="btn btn-inverse disabled" id="button_run" onclick="install_package();">Install</button>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-inverse disabled dropdown-toggle" data-toggle="dropdown">Code <span class="caret"></span></button>
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li><a href="#">Code</a></li>
+                                        <li><a href="#">Markdown</a></li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

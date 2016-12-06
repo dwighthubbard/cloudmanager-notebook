@@ -91,12 +91,12 @@ if __name__ == '__main__':
         url='http=//github.com/dhubbard/cloudmanager-notebook',
         license='LICENSE.txt',
         packages=[
-            'cloudmanager_notebook', 'cloudmanager_notebook_ui',
+            'cloudmanager_notebook', 'cloudmanager_notebook.cloudmanager_notebook', 'cloudmanager_notebook_ui'
         ],
         long_description='Short description of this project',
         description='Short description of this project',
         install_requires=[
-            'Django<=1.10', 'Jinja2', 'micropython-cloudmanager'
+            'asgi-redis', 'channels', 'daphne', 'Django<=1.10', 'Jinja2', 'micropython-cloudmanager'
         ],
         package_data= {
             'cloudmanager_notebook_ui': [

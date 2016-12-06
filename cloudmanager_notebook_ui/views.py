@@ -1,5 +1,5 @@
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import TemplateView
@@ -30,13 +30,15 @@ class BoardView(TemplateView):
         print(kwargs)
         if self.board:
             context['board'] = MicropythonBoard(self.board)
+        context['editor'] = {
+            'lineNumbers': 'false'
+        }
         # context['boards'] = MicropythonBoards().all()
         return context
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class RunView(View):
-    template_name = 'cloudmanager_notebook_ui/run.html'
     http_method_names = ['post']
 
     def post(self, *args, **kwargs):
@@ -45,9 +47,25 @@ class RunView(View):
         code = args[0].POST['code']
         output = ''
         try:
-            for result in MicropythonBoards().execute(code, range=board):
-                output = result.read().decode()
-                break
+            output = MicropythonBoard(board).execute(code).read().decode()
+            # for result in MicropythonBoards().execute(code, range=board):
+            #     print(result)
+            #     output += result.read().decode()
         except BoardNotResponding:
             output = 'Board %r is not responding' % board
         return JsonResponse({'output': output})
+
+@method_decorator(csrf_exempt, name='dispatch')
+class StatusView(View):
+    http_method_names = ['get']
+
+    def get(self, request, **kwargs):
+        self.board = request.GET.get('board', None)
+        state = 'Offline'
+        if self.board:
+            state = MicropythonBoard(self.board).state
+        if not state:
+            state ='Not Responding'
+        if request.GET.get('format', None):
+            return JsonResponse({'state': state})
+        return HttpResponse(state)

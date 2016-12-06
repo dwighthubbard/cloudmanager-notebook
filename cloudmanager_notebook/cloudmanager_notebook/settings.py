@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'cloudmanager_notebook_ui',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -100,6 +101,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'asgiref.inmemory.ChannelLayer',
+        'ROUTING': 'cloudmanager_notebook_ui.routing.channel_routing',
+    },
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
